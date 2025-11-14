@@ -1,0 +1,56 @@
+name: Generate Full Android Project
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Generate root Android project
+      run: |
+        mkdir -p app
+
+        cat > settings.gradle <<'EOF'
+rootProject.name = "DotMe9"
+include ':app'
+EOF
+
+        cat > build.gradle <<'EOF'
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:8.1.1"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.10"
+    }
+}
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+EOF
+
+        cat > gradle.properties <<'EOF'
+org.gradle.jvmargs=-Xmx2g
+android.useAndroidX=true
+EOF
+
+        # Create Gradle wrapper
+        gradle wrapper --gradle-version 8.2 || true
+        chmod +x gradlew
+
+    - name: Commit project files
+      run: |
+        git config user.email "actions@github.com"
+        git config user.name "GitHub Actions"
+        git add .
+        git commit -m "Generated full Android project" || echo "No changes"
+        git push
