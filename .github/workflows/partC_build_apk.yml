@@ -1,0 +1,43 @@
+name: DotMe9 - Part C Build APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Java (Android requires it)
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: "17"
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install -y zip unzip
+
+    - name: Generate Gradle Wrapper if missing
+      run: |
+        if [ ! -f "./gradlew" ]; then
+          echo "Gradle wrapper missing — generating..."
+          gradle wrapper --gradle-version 8.5 || true
+          chmod +x gradlew
+        fi
+
+    - name: Build Debug APK
+      run: |
+        ./gradlew assembleDebug --no-daemon || ./gradlew build --no-daemon
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: DotMe9-debug.apk
+        path: app/build/outputs/apk/debug/app-debug.apk
