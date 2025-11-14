@@ -1,0 +1,37 @@
+name: DotMe9 - Part A Base Setup
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create_base:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Create base Android project folders
+      run: |
+        mkdir -p app/src/main/java/com/dotme/app
+        mkdir -p app/src/main/res/layout
+        mkdir -p app/src/main/assets
+
+        echo "package com.dotme.app
+
+class Placeholder {}" > app/src/main/java/com/dotme/app/Placeholder.kt
+
+        echo "<LinearLayout xmlns:android='http://schemas.android.com/apk/res/android'
+            android:layout_width='match_parent'
+            android:layout_height='match_parent'
+            android:orientation='vertical'>
+        </LinearLayout>" > app/src/main/res/layout/activity_main.xml
+
+        echo "ads.youtube.com" > app/src/main/assets/hosts.txt
+
+    - name: Commit base files
+      run: |
+        git config user.email 'actions@github.com'
+        git config user.name 'GitHub Actions'
+        git add .
+        git commit -m 'Part A: Base project structure added' || echo "No changes"
+        git push
